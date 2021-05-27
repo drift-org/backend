@@ -2,7 +2,6 @@ package routes
 
 import (
 	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,6 +14,8 @@ func SetupRouter() {
 	router.NoRoute(func(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 	})
+
+	authRoute(router.Group("/auth"))
 
 	router.Run()
 }

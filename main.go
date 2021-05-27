@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-
 	"github.com/drift-org/backend/helpers"
 	"github.com/drift-org/backend/routes"
 	"github.com/joho/godotenv"
