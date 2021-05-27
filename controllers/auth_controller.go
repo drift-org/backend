@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"github.com/drift-org/backend/models"
-	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/kamva/mgm/v3"
-	"golang.org/x/crypto/bcrypt"
 	"go.mongodb.org/mongo-driver/bson"
+	"golang.org/x/crypto/bcrypt"
+	"net/http"
 )
 
 type AuthController interface {
@@ -21,10 +21,10 @@ func NewAuthController() AuthController {
 
 func (this *authController) Register(context *gin.Context) {
 	type IRegister struct {
-		Name             string `json:"name" binding:"required"`
-		Age              int    `json:"age" binding:"required"`
-		EmailAddress     string `json:"email_address" binding:"required"`
-		Password         string `json:"passsword" binding:"required"`
+		Name         string `json:"name" binding:"required"`
+		Age          int    `json:"age" binding:"required"`
+		EmailAddress string `json:"email_address" binding:"required"`
+		Password     string `json:"passsword" binding:"required"`
 	}
 	var body IRegister
 	if err := context.ShouldBindJSON(&body); err != nil {
@@ -32,18 +32,18 @@ func (this *authController) Register(context *gin.Context) {
 		return
 	}
 
-  // Use bcrypt to encrypt the password.
-  encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.MinCost)
-  if err != nil {
-    context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// Use bcrypt to encrypt the password.
+	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.MinCost)
+	if err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-  }
+	}
 
 	user := &models.User{
-		Name: body.Name,
-		Age: body.Age,
+		Name:         body.Name,
+		Age:          body.Age,
 		EmailAddress: body.EmailAddress,
-		Password: string(encryptedPassword),
+		Password:     string(encryptedPassword),
 	}
 
 	coll := mgm.Coll(user)

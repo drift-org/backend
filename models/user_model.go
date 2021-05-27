@@ -9,5 +9,5 @@ type User struct {
 	EmailAddress     string `bson:"email_address" binding:"required"`
 	Password         string `bson:"passsword" binding:"required"`
 	// University       string `bson:"university" binding:"required"`
-	Points           int    `bson:"points"` 
+	Points int `bson:"points"`
 }
