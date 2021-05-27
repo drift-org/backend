@@ -49,9 +49,8 @@ func (this *authController) Register(context *gin.Context) {
 	coll := mgm.Coll(user)
 
 	// Ensure that this email hasn't been registered already.
-	var existingUsers []models.User
-	coll.SimpleFind(&existingUsers, bson.M{"email_address": user.EmailAddress})
-	if len(existingUsers) > 0 {
+	err = coll.First(bson.M{"email_address": user.EmailAddress}, user)
+	if err == nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "User with email already exists."})
 		return
 	}
