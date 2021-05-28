@@ -14,8 +14,8 @@ type User struct {
 	// University       string `bson:"university" binding:"required"`
 	Points 		 int `bson:"points" json:"points"`
 	Username	 string `bson:"username" json:"username" binding:"required"`
-	Friends		 [0]primitive.ObjectID `bson:"friends" json:"friends"`
-	FriendRequests	 [0]primitive.ObjectID `bson:"friend_requests" json:"friend_requests"`
-	PastDrifts	 [0]primitive.ObjectID `bson:"past_drifts" json:"past_drifts"`
+	Friends		 []primitive.ObjectID `bson:"friends" json:"friends"`
+	FriendRequests	 []primitive.ObjectID `bson:"friend_requests" json:"friend_requests"`
+	PastDrifts	 []primitive.ObjectID `bson:"past_drifts" json:"past_drifts"`
 	CurrentDrift	 primitive.ObjectID `bson:"current_drift" json:"current_drift"`
 }
