@@ -2,13 +2,19 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/drift-org/backend/helpers"
 	"github.com/drift-org/backend/routes"
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"os"
 )
+
+var (
+	jwtService   helpers.JWTService   = helpers.NewJWTService()
+)
+
 
 func main() {
 	err := godotenv.Load()
