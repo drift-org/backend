@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	jwtService   helpers.JWTService   = helpers.NewJWTService()
+	jwtService     helpers.JWTService         = helpers.NewJWTService()
 	authController controllers.AuthController = controllers.NewAuthController(jwtService)
 )
 

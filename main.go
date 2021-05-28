@@ -12,9 +12,8 @@ import (
 )
 
 var (
-	jwtService   helpers.JWTService   = helpers.NewJWTService()
+	jwtService helpers.JWTService = helpers.NewJWTService()
 )
-
 
 func main() {
 	err := godotenv.Load()

@@ -11,14 +11,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
 type AuthController interface {
 	Register(context *gin.Context)
 	Login(context *gin.Context)
 }
 
-type authController struct{
-	jwtService   helpers.JWTService
+type authController struct {
+	jwtService helpers.JWTService
 }
 
 func NewAuthController(jwtService helpers.JWTService) AuthController {
