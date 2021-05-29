@@ -19,3 +19,21 @@ type User struct {
 	PastDrifts	 []primitive.ObjectID `bson:"pastDrifts" json:"pastDrifts"`
 	CurrentDrift	 primitive.ObjectID `bson:"currentDrift" json:"currentDrift"`
 }
+
+func (model *User) Creating() error {
+	if err := model.DefaultModel.Creating(); err != nil {
+		return err
+	}
+
+	if model.Friends == nil {
+		model.Friends = []primitive.ObjectID{}
+	}
+	if model.FriendRequests == nil {
+		model.FriendRequests = []primitive.ObjectID{}
+	}
+	if model.PastDrifts == nil {
+		model.PastDrifts = []primitive.ObjectID{}
+	}
+
+	return nil
+}
