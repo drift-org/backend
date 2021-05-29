@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/drift-org/backend/helpers"
 	"github.com/drift-org/backend/models"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
@@ -17,11 +19,14 @@ type AuthController interface {
 }
 
 type authController struct {
-	jwtService helpers.JWTService
+	JWTSecret string
 }
 
-func NewAuthController(jwtService helpers.JWTService) AuthController {
-	return &authController{jwtService: jwtService}
+func NewAuthController() AuthController {
+	envError := godotenv.Load()
+	helpers.AlertError(envError, "The .env file could not be found")
+	JWTSecret := os.Getenv("JWT_SECRET")
+	return &authController{JWTSecret}
 }
 
 func (ctrl *authController) Register(context *gin.Context) {
@@ -42,7 +47,7 @@ func (ctrl *authController) Register(context *gin.Context) {
 	coll := mgm.Coll(&body)
 
 	// Ensure that this email hasn't been registered already.
-	err = coll.First(bson.M{"email_address": body.EmailAddress}, &body)
+	err = coll.First(bson.M{"emailAddress": body.EmailAddress}, &body)
 	if err == nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "User with email already exists."})
 		return
@@ -59,7 +64,7 @@ func (ctrl *authController) Register(context *gin.Context) {
 
 func (ctrl *authController) Login(context *gin.Context) {
 	type ILogin struct {
-		EmailAddress string `json:"email_address" binding:"required"`
+		EmailAddress string `json:"emailAddress" binding:"required"`
 		Password     string `json:"password" binding:"required"`
 	}
 	var body ILogin
@@ -69,7 +74,7 @@ func (ctrl *authController) Login(context *gin.Context) {
 	}
 	user := &models.User{}
 	coll := mgm.Coll(user)
-	err := coll.First(bson.M{"email_address": body.EmailAddress}, user)
+	err := coll.First(bson.M{"emailAddress": body.EmailAddress}, user)
 	if err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Couldn't find user."})
 		return
@@ -81,8 +86,8 @@ func (ctrl *authController) Login(context *gin.Context) {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrect password."})
 		return
 	}
-	user_id := user.ID.String()
-	token, err := ctrl.jwtService.GenerateToken(user_id)
+	userId := user.ID.String()
+	token, err := helpers.GenerateToken(userId, ctrl.JWTSecret)
 	if err != nil {
 		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Couldn't generate auth token."})
 		return

@@ -11,10 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	jwtService helpers.JWTService = helpers.NewJWTService()
-)
-
 func main() {
 	err := godotenv.Load()
 	helpers.AlertError(err, "The .env file could not be found")
