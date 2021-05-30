@@ -11,9 +11,6 @@ import (
 var (
 	jwtServiceCreds JWTServiceCreds = NewJWTServiceCreds()
 )
-type JWTService interface {
-	GenerateToken(user_id string) (string, error)
-}
 
 type JWTServiceCreds struct {
 	secretKey string

@@ -10,7 +10,7 @@ type User struct {
 	Name             string `bson:"name" json:"name" binding:"required"`
 	Age              int    `bson:"age" json:"age" binding:"required"`
 	EmailAddress     string `bson:"emailAddress" json:"emailAddress" binding:"required"`
-	Password         string `bson:"passsword" json:"passsword" binding:"required"`
+	Password         string `bson:"password" json:"password" binding:"required"`
 	// University       string `bson:"university" binding:"required"`
 	Points 		 int `bson:"points" json:"points"`
 	Username	 string `bson:"username" json:"username" binding:"required"`

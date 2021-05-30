@@ -47,6 +47,12 @@ func (ctrl *authController) Register(context *gin.Context) {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "User with email already exists."})
 		return
 	}
+	// Ensure that this username hasn't been registered already.
+	err = coll.First(bson.M{"username": body.Username}, &body)
+	if err == nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "User with username already exists."})
+		return
+	}
 
 	err = coll.Create(&body)
 	if err != nil {
@@ -59,7 +65,8 @@ func (ctrl *authController) Register(context *gin.Context) {
 
 func (ctrl *authController) Login(context *gin.Context) {
 	type ILogin struct {
-		EmailAddress string `json:"emailAddress" binding:"required"`
+		EmailAddress string `json:"emailAddress"`
+		Username string `json:"username"`
 		Password     string `json:"password" binding:"required"`
 	}
 	var body ILogin
@@ -67,15 +74,30 @@ func (ctrl *authController) Login(context *gin.Context) {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Determine if user is logging in with email or username
+	var loginType string
+	var loginValue string
+	if body.EmailAddress != "" {
+		loginType = "emailAddress"
+		loginValue = body.EmailAddress
+	} else if body.Username != "" {
+		loginType = "username"
+		loginValue = body.Username
+	} else {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Neither username/email address not provided."})
+		return
+	}
+
 	user := &models.User{}
 	coll := mgm.Coll(user)
-	err := coll.First(bson.M{"emailAddress": body.EmailAddress}, user)
+	err := coll.First(bson.M{loginType: loginValue}, user)
 	if err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Couldn't find user."})
 		return
 	}
 	hashedPassword := user.Password
-
+	
 	// Compare plaintext password with hashed password stored in DB.
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(body.Password)); err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrect password."})
@@ -89,3 +111,4 @@ func (ctrl *authController) Login(context *gin.Context) {
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Success", "authToken": token})
 }
+
