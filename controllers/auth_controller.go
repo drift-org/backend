@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/drift-org/backend/helpers"
 	"github.com/drift-org/backend/models"
@@ -20,7 +21,6 @@ type authController struct {
 }
 
 func NewAuthController() AuthController {
-	// helpers.AlertError(envError, "The .env file could not be found")
 	return &authController{}
 }
 
@@ -30,6 +30,7 @@ func (ctrl *authController) Register(context *gin.Context) {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	body.EmailAddress = strings.ToLower(body.EmailAddress)
 
 	// Use bcrypt to encrypt the password.
 	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.MinCost)
@@ -38,7 +39,6 @@ func (ctrl *authController) Register(context *gin.Context) {
 		return
 	}
 	body.Password = string(encryptedPassword)
-
 	coll := mgm.Coll(&body)
 
 	// Ensure that this email hasn't been registered already.
@@ -66,7 +66,7 @@ func (ctrl *authController) Register(context *gin.Context) {
 func (ctrl *authController) Login(context *gin.Context) {
 	type ILogin struct {
 		EmailAddress string `json:"emailAddress"`
-		Username string `json:"username"`
+		Username     string `json:"username"`
 		Password     string `json:"password" binding:"required"`
 	}
 	var body ILogin
@@ -85,7 +85,7 @@ func (ctrl *authController) Login(context *gin.Context) {
 		loginType = "username"
 		loginValue = body.Username
 	} else {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Neither username/email address not provided."})
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Neither username/email address are provided."})
 		return
 	}
 
@@ -97,7 +97,7 @@ func (ctrl *authController) Login(context *gin.Context) {
 		return
 	}
 	hashedPassword := user.Password
-	
+
 	// Compare plaintext password with hashed password stored in DB.
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(body.Password)); err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrect password."})
@@ -111,4 +111,3 @@ func (ctrl *authController) Login(context *gin.Context) {
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Success", "authToken": token})
 }
-

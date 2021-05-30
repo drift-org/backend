@@ -11,7 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-
 func main() {
 	err := godotenv.Load()
 	helpers.AlertError(err, "The .env file could not be found")
