@@ -2,12 +2,10 @@ package controllers
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/drift-org/backend/helpers"
 	"github.com/drift-org/backend/models"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
@@ -19,14 +17,11 @@ type AuthController interface {
 }
 
 type authController struct {
-	JWTSecret string
 }
 
 func NewAuthController() AuthController {
-	envError := godotenv.Load()
-	helpers.AlertError(envError, "The .env file could not be found")
-	JWTSecret := os.Getenv("JWT_SECRET")
-	return &authController{JWTSecret}
+	// helpers.AlertError(envError, "The .env file could not be found")
+	return &authController{}
 }
 
 func (ctrl *authController) Register(context *gin.Context) {
@@ -87,7 +82,7 @@ func (ctrl *authController) Login(context *gin.Context) {
 		return
 	}
 	userId := user.ID.String()
-	token, err := helpers.GenerateToken(userId, ctrl.JWTSecret)
+	token, err := helpers.GenerateToken(userId)
 	if err != nil {
 		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Couldn't generate auth token."})
 		return

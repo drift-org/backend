@@ -1,12 +1,39 @@
 package helpers
 
 import (
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/joho/godotenv"
 )
 
-func GenerateToken(userId string, JWTSecret string) (string, error) {
+var (
+	jwtServiceCreds JWTServiceCreds = NewJWTServiceCreds()
+)
+type JWTService interface {
+	GenerateToken(user_id string) (string, error)
+}
+
+type JWTServiceCreds struct {
+	secretKey string
+	issuer    string
+}
+
+func NewJWTServiceCreds() JWTServiceCreds {
+	envError := godotenv.Load()
+	AlertError(envError, "The .env file could not be found")
+	JWTSecret := os.Getenv("JWT_SECRET")
+	return JWTServiceCreds{
+		secretKey: JWTSecret,
+		issuer:    "drift",
+	}
+}
+
+/*
+This function generates an authentication token for a user going through the login process.
+*/
+func GenerateToken(userId string) (string, error) {
 
 	// Generate claims object that contains user's ObjectID and expires in 1 week.
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
@@ -15,6 +42,6 @@ func GenerateToken(userId string, JWTSecret string) (string, error) {
 	})
 
 	// Sign the claim and return the generated token string.
-	token, err := claims.SignedString([]byte(JWTSecret))
+	token, err := claims.SignedString([]byte(jwtServiceCreds.secretKey))
 	return token, err
 }
