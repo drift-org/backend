@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -18,8 +17,6 @@ type JWTServiceCreds struct {
 }
 
 func NewJWTServiceCreds() JWTServiceCreds {
-	envError := godotenv.Load()
-	AlertError(envError, "The .env file could not be found")
 	JWTSecret := os.Getenv("JWT_SECRET")
 	return JWTServiceCreds{
 		secretKey: JWTSecret,
