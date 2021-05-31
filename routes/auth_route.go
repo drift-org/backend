@@ -11,4 +11,5 @@ var (
 
 func authRoute(g *gin.RouterGroup) {
 	g.POST("/register", authController.Register)
+	g.POST("/login", authController.Login)
 }
