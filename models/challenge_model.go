@@ -7,7 +7,7 @@ import (
 type Challenge struct {
 	mgm.DefaultModel `bson:",inline"`
 	Longitude        int    `bson:"longitude" json:"longitude"`
-	Latitude         int    `bson:"latitude" json:"lattitude"`
+	Latitude         int    `bson:"latitude" json:"latitude"`
 	Address          string `bson:"address" json:"address"`
 	TaskName         string `bson:"taskName" json:"taskName" binding:"required"`
 	Description      string `bson:"description" json:"description" binding:"required"`
