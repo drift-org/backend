@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#!————————————————————————————————————————————————————————————————————————————*!
+# Git pre-commit hook.
+#
+# Run `make setup-hooks` to install.
+#!————————————————————————————————————————————————————————————————————————————*!
+
+echo "running pre-commit hook..."
+
+# Format files.
+make clean
+
+# Re-add files that were changed.
+git add .
