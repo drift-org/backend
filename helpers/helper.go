@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"log"
+	"reflect"
 )
 
 /*
@@ -18,4 +19,20 @@ func AlertError(err error, msg ...string) {
 		}
 		log.Fatal(err)
 	}
+}
+
+/*
+This function maps a generic slice to another slice.
+*/
+func Map(t interface{}, f func(interface{}) interface{}) []interface{} {
+	switch reflect.TypeOf(t).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(t)
+		arr := make([]interface{}, s.Len())
+		for i := 0; i < s.Len(); i++ {
+			arr[i] = f(s.Index(i).Interface())
+		}
+		return arr
+	}
+	return nil
 }
