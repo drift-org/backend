@@ -8,6 +8,7 @@ import (
 	"github.com/drift-org/backend/models"
 	"github.com/gin-gonic/gin"
 	"github.com/kamva/mgm/v3"
+	"github.com/mpvl/unique"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -29,6 +30,17 @@ func (ctrl *groupController) Create(context *gin.Context) {
 	var body ICreate
 	if err := context.ShouldBindJSON(&body); err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Sort the usernames. This is so that the SAME userIDs slice is created for different orderings
+	// of the usernames passed-in. This is so that we can guarantee that a group isn't created twice
+	// with different orderings of users.
+	sort.Strings(body.Usernames)
+
+	// Ensure that the usernames are unique.
+	if !unique.IsUniqued(sort.StringSlice(body.Usernames)) {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "usernames not unique"})
 		return
 	}
 
@@ -63,13 +75,6 @@ func (ctrl *groupController) Create(context *gin.Context) {
 		userIDs[i] = users[i].DefaultModel.IDField.ID
 	}
 
-	// Sort the userIDs. This is so that the SAME userIDs slice is created for different orderings
-	// of the usernames passed-in. This is so that we can guarantee that a group isn't created twice
-	// with different orderings of users.
-	sort.Slice(userIDs, func(i, j int) bool {
-		return userIDs[i].String() < userIDs[j].String()
-	})
-
 	//----------------------------------------------------------------------------------------
 
 	// Step 3: Create the Group.
@@ -77,7 +82,8 @@ func (ctrl *groupController) Create(context *gin.Context) {
 		Users: userIDs,
 	}
 
-	// Ensure that this group hasn't been created already.
+	// Ensure that this group hasn't been created already. Since the userIDs are sorted and unique, we can
+	// search by the users field.
 	err = groupCollection.First(bson.M{"users": userIDs}, group)
 	if err == nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Group already exists."})
