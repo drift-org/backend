@@ -49,13 +49,11 @@ func ValidateToken(tokenString string) (string, error) {
 		return []byte(jwtServiceCreds.secretKey), nil
 	}))
 	if err != nil {
-		return "", err
-	}
-	// Type assertion so that we can extract specific fields from our claims object.
-	claims, ok := token.Claims.(*jwt.StandardClaims)
-	if ok && token.Valid {
-		return claims.Subject, nil
+		// Type assertion so that we can extract specific fields from our claims object.
+		claims, ok := token.Claims.(*jwt.StandardClaims)
+		if ok && token.Valid {
+			return claims.Subject, nil
+		}
 	}
 	return "", err
-
 }
