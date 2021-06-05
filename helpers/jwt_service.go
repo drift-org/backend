@@ -48,7 +48,7 @@ func ValidateToken(tokenString string) (string, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, (func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtServiceCreds.secretKey), nil
 	}))
-	if err != nil {
+	if err == nil {
 		// Type assertion so that we can extract specific fields from our claims object.
 		claims, ok := token.Claims.(*jwt.StandardClaims)
 		if ok && token.Valid {
