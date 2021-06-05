@@ -17,3 +17,10 @@ setup-hooks:
 	find .git/hooks -type l -exec rm {} \;
 	find .githooks -type f -exec ln -sf ../../{} .git/hooks/ \;
 	chmod u+x .git/hooks/*
+
+# Install packages referenced
+install:
+	go get -t
+
+test:
+	ginkgo -v ./...
