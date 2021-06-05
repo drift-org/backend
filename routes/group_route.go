@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/drift-org/backend/controllers"
+	"github.com/drift-org/backend/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,5 +11,5 @@ var (
 )
 
 func groupRoute(g *gin.RouterGroup) {
-	g.POST("/group", groupController.Create)
+	g.POST("/group", middleware.VerifyAuthenticated(), groupController.Create)
 }

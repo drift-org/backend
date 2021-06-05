@@ -103,7 +103,7 @@ func (ctrl *authController) Login(context *gin.Context) {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrect password."})
 		return
 	}
-	userId := user.ID.String()
+	userId := user.ID.Hex()
 	token, err := helpers.GenerateToken(userId)
 	if err != nil {
 		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Couldn't generate auth token."})
