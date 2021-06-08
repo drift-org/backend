@@ -1,7 +1,7 @@
-# replace this variable with the location that leads to your air executable file
-air_location=~/go/bin/air 
+GO_BIN=~/go/bin
+
 dev:
-	${air_location}
+	${GO_BIN}/air
 run:
 	go build -o ./tmp/main .
 	./tmp/main
@@ -23,4 +23,4 @@ install:
 	go get -t
 
 test:
-	ginkgo -p ./...
+	${GO_BIN}/ginkgo -p $(ARGS) ./...
