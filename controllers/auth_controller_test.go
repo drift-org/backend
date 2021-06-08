@@ -24,11 +24,11 @@ var _ = Describe("AuthController", func() {
 
 			// Create a sample request to register.
 			context := helpers.CreateTestContext("", `{
-      	"username": "TestUsername",
+        "username": "TestUsername",
         "name": "TestName",
-		    "age": 10,
-		    "emailAddress": "Test@Test.com",
-		    "password": "TestPassword"
+        "age": 10,
+        "emailAddress": "Test@Test.com",
+        "password": "TestPassword"
       }`)
 
 			// Test the first user, and that the response is OK.
@@ -45,22 +45,22 @@ var _ = Describe("AuthController", func() {
 
 			// Attempt creating a user with the same username.
 			duplicateContext1 := helpers.CreateTestContext("", `{
-      	"username": "TestUsername",
+        "username": "TestUsername",
         "name": "differentName",
-		    "age": 2,
-		    "emailAddress": "differentEmail@gmail.com",
-		    "password": "TestPassword"
+        "age": 2,
+        "emailAddress": "differentEmail@gmail.com",
+        "password": "TestPassword"
       }`)
 			authController.Register(duplicateContext1)
 			Expect(duplicateContext1.Writer.Status()).To(Equal(http.StatusBadRequest))
 
 			// Attempt creating a user with the same email.
 			duplicateContext2 := helpers.CreateTestContext("", `{
-      	"username": "differentUsername",
+        "username": "differentUsername",
         "name": "differentName",
-		    "age": 2,
-		    "emailAddress": "Test@Test.com",,
-		    "password": "TestPassword"
+        "age": 2,
+        "emailAddress": "Test@Test.com",,
+        "password": "TestPassword"
       }`)
 			authController.Register(duplicateContext2)
 			Expect(duplicateContext2.Writer.Status()).To(Equal(http.StatusBadRequest))
