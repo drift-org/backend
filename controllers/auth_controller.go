@@ -60,7 +60,7 @@ func (ctrl *authController) Register(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "Success"})
+	context.JSON(http.StatusOK, gin.H{"message": "Success", "user": body})
 }
 
 func (ctrl *authController) Login(context *gin.Context) {
