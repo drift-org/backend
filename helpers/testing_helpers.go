@@ -82,7 +82,7 @@ func TestWithMongo(databaseName string, tester func()) func() {
 Connects to a passed-in database on your LOCAL mongodb host, for testing purposes.
 
 To allow for concurrent testing specs, this function should be called
-**separately** on each test (that require mongodb), with a **different** database name.
+**separately** on each test (that requires mongodb), with a **different** database name.
 For more information, see https://github.com/drift-org/backend/wiki/Testing
 
 Parameters:
@@ -97,6 +97,10 @@ func ConnectTestDB(databaseName string) *mongo.Database {
 	// Parse the local database url.
 	databaseURL := os.Getenv("TESTING_MONGO_URL")
 	Expect(databaseURL).NotTo(BeEmpty(), "TESTING_MONGO_URL is missing from .env")
+
+	// Make sure that the word "localhost" is inside the databaseURL. We want to double check that this
+	// is a locally ran mongo client and make sure we aren't writing to our production database.
+	Expect(databaseURL).To(ContainSubstring("localhost"), "TESTING_MONGO_URL must contain 'localhost'")
 
 	// Create the client options. Since this test is in a different process, set the default config.
 	clientOptions := options.Client().ApplyURI(databaseURL)
