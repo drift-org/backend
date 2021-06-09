@@ -13,7 +13,6 @@ import (
 	"github.com/kamva/mgm/v3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
@@ -123,17 +122,7 @@ We do this to make sure our tests are completely deterministic with no state
 prior to testing.
 */
 func ResetTestDB(database *mongo.Database) {
-
-	// Get a slice of all collections.
-	collections, err := database.ListCollectionNames(mgm.Ctx(), bson.D{})
-	Expect(err).NotTo(HaveOccurred())
-	Expect(collections).NotTo(BeNil())
-
-	// Drop each collection.
-	for _, coll := range collections {
-		err := database.Collection(coll).Drop(mgm.Ctx())
-		Expect(err).NotTo(HaveOccurred())
-	}
+	database.Drop(mgm.Ctx())
 }
 
 /*
