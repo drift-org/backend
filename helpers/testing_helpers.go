@@ -7,6 +7,7 @@ package helpers
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -35,6 +36,9 @@ Example:
 func CreateTestContext(query string, body string) *gin.Context {
 	gin.SetMode(gin.TestMode)
 	context, _ := gin.CreateTestContext(httptest.NewRecorder())
+
+	// Make sure that the body json is valid.
+	Expect(json.Valid([]byte(body))).To(BeTrue(), "Invalid body: "+body)
 
 	// Add the http request to the context. Technically, not all our requests are POST requests, but
 	// it doesn't actually matter for testing since we don't reference the context type in any of our
