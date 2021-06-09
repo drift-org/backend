@@ -59,7 +59,7 @@ var _ = Describe("AuthController", func() {
 				"username": "differentUsername",
 				"name": "differentName",
 				"age": 2,
-				"emailAddress": "Test@Test.com",,
+				"emailAddress": "Test@Test.com",
 				"password": "TestPassword"
 			}`)
 			authController.Register(duplicateContext2)
