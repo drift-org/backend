@@ -130,5 +130,5 @@ Logs std output. The standard fmt.Println doesn't show up when testing with gink
 For debugging purposes ONLY.
 */
 func GinkgoLog(message string) {
-	_, _ = fmt.Fprintf(GinkgoWriter, "[DEBUG]"+message)
+	fmt.Fprintf(GinkgoWriter, "[DEBUG]"+message)
 }
