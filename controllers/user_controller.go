@@ -21,10 +21,10 @@ func NewUserController() UserController {
 
 func (ctrl *userController) Info(context *gin.Context) {
 	// Id refers to MongoDB user object ID. Specificty refers to the verbocity of the returned friends array
-	// 0 returns ONLY friend user IDs, 1 returns friend user IDs AND usernames
+	// 0 returns ONLY friend user IDs (default), 1 returns friend user IDs AND usernames
 	type ICreate struct {
-		Id          string `json:"id"`
-		Specificity int    `json:"specificity"`
+		Id          string `json:"id" binding:"required"`
+		Specificity int    `json:"specificity" default:0`
 	}
 	var friendUsernames []string
 	var body ICreate
@@ -34,7 +34,7 @@ func (ctrl *userController) Info(context *gin.Context) {
 		return
 	}
 
-	if body.Specificity > 1 || body.Specificity < 0 {
+	if body.Specificity != 1 && body.Specificity != 0 {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Specificity must be either 0 or 1"})
 		return
 	}
