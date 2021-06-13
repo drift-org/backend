@@ -64,6 +64,7 @@ var _ = Describe("GroupController", func() {
 			groupController.Create(context)
 			Expect(context.Writer.Status()).To(Equal(http.StatusOK))
 
+			// Test that the group was written to mongo.
 			group := &models.Group{}
 			_ = mgm.Coll(group).First(bson.M{}, group)
 			Expect(group).NotTo(BeNil())
