@@ -11,5 +11,5 @@ var (
 )
 
 func groupRoute(g *gin.RouterGroup) {
-	g.POST("/group", middleware.VerifyAuthenticated(), groupController.Create)
+	g.POST("/", middleware.VerifyAuthenticated(), groupController.Create)
 }
