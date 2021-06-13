@@ -11,6 +11,5 @@ var (
 )
 
 func userRoute(g *gin.RouterGroup) {
-	g.GET("/info", middleware.VerifyAuthenticated(), userController.Info)
-	g.GET("/info", userController.Info)
+	g.GET("/", middleware.VerifyAuthenticated(), userController.Info)
 }
