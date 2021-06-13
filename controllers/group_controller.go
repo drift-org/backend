@@ -8,7 +8,6 @@ import (
 	"github.com/drift-org/backend/models"
 	"github.com/gin-gonic/gin"
 	"github.com/kamva/mgm/v3"
-	"github.com/mpvl/unique"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -25,7 +24,7 @@ func NewGroupController() GroupController {
 
 func (ctrl *groupController) Create(context *gin.Context) {
 	type ICreate struct {
-		Usernames []string `json:"usernames"`
+		Usernames []string `json:"usernames" binding:"required,min=1,unique"`
 	}
 	var body ICreate
 	if err := context.ShouldBindJSON(&body); err != nil {
@@ -37,12 +36,6 @@ func (ctrl *groupController) Create(context *gin.Context) {
 	// of the usernames passed-in. This is so that we can guarantee that a group isn't created twice
 	// with different orderings of users.
 	sort.Strings(body.Usernames)
-
-	// Ensure that the usernames are unique.
-	if !unique.IsUniqued(sort.StringSlice(body.Usernames)) {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "usernames not unique"})
-		return
-	}
 
 	// Convenience references to collections.
 	userColllection := mgm.Coll(&models.User{})
@@ -67,12 +60,31 @@ func (ctrl *groupController) Create(context *gin.Context) {
 		return
 	}
 
+	// Make sure that every username was found in the database.
+	if len(users) != len(body.Usernames) {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "some usernames were not found."})
+		return
+	}
+
 	//----------------------------------------------------------------------------------------
 
 	// Step 2: Find the id of each of the User models found.
-	var userIDs []primitive.ObjectID = make([]primitive.ObjectID, len(users))
+	// While iterating, make sure that the user who created the group is inside the userIDs.
+	userIDs := make([]primitive.ObjectID, len(users))
+	bearerUserFound := false
+
 	for i := 0; i < len(userIDs); i++ {
 		userIDs[i] = users[i].DefaultModel.IDField.ID
+
+		if !bearerUserFound && userIDs[i].Hex() == context.MustGet("userID") {
+			bearerUserFound = true
+		}
+	}
+
+	// Make sure that the user who created the group is inside the usernames.
+	if !bearerUserFound {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "usernames must contain the bearer user"})
+		return
 	}
 
 	//----------------------------------------------------------------------------------------
