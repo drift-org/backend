@@ -24,18 +24,13 @@ func (ctrl *userController) Info(context *gin.Context) {
 	// 0 returns ONLY friend user IDs (default), 1 returns friend user IDs AND usernames
 	type ICreate struct {
 		Id          string `json:"id" binding:"required"`
-		Specificity int    `json:"specificity" default:0`
+		Specificity int    `json:"specificity" binding:"eq=0|eq=1" default:0`
 	}
 	var friendUsernames []string
 	var body ICreate
 
 	if err := context.ShouldBindJSON(&body); err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if body.Specificity != 1 && body.Specificity != 0 {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Specificity must be either 0 or 1"})
 		return
 	}
 
