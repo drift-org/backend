@@ -1,4 +1,4 @@
-module github.com/drift-org/backend
+module backend
 
 go 1.16
 

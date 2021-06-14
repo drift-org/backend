@@ -5,12 +5,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
 
-	"github.com/drift-org/backend/controllers"
-	"github.com/drift-org/backend/helpers"
-	"github.com/drift-org/backend/models"
+	"go.mongodb.org/mongo-driver/bson"
+
+	"backend/controllers"
+	"backend/helpers"
+	"backend/models"
 )
 
 var _ = Describe("AuthController", func() {

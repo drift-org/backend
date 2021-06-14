@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/drift-org/backend/helpers"
-	"github.com/drift-org/backend/models"
+	"backend/helpers"
+	"backend/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/kamva/mgm/v3"
 	"github.com/mpvl/unique"

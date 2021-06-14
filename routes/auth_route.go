@@ -1,7 +1,8 @@
 package routes
 
 import (
-	"github.com/drift-org/backend/controllers"
+	"backend/controllers"
+
 	"github.com/gin-gonic/gin"
 )
 
