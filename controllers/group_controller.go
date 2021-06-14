@@ -62,7 +62,7 @@ func (ctrl *groupController) Create(context *gin.Context) {
 
 	// Make sure that every username was found in the database.
 	if len(users) != len(body.Usernames) {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "some usernames were not found."})
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Some usernames were not found."})
 		return
 	}
 
@@ -74,7 +74,7 @@ func (ctrl *groupController) Create(context *gin.Context) {
 	bearerUserFound := false
 
 	for i := 0; i < len(userIDs); i++ {
-		userIDs[i] = users[i].DefaultModel.IDField.ID
+		userIDs[i] = users[i].ID
 
 		if !bearerUserFound && userIDs[i].Hex() == context.MustGet("userID") {
 			bearerUserFound = true
@@ -83,7 +83,7 @@ func (ctrl *groupController) Create(context *gin.Context) {
 
 	// Make sure that the user who created the group is inside the usernames.
 	if !bearerUserFound {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "usernames must contain the bearer user"})
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Usernames must contain the bearer user."})
 		return
 	}
 

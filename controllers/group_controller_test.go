@@ -33,7 +33,7 @@ Gets the authorization (simulates logging in) for a specific user, based on the 
 func LoginAuthUsername(context *gin.Context, username string) {
 	user := &models.User{}
 	mgm.Coll(user).First(bson.M{"username": username}, user)
-	context.Set("userID", user.DefaultModel.IDField.ID.Hex())
+	context.Set("userID", user.ID.Hex())
 }
 
 var _ = Describe("GroupController", func() {
