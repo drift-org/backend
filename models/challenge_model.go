@@ -37,7 +37,7 @@ func (model *Challenge) Saving() error {
 
 func ChallengeIndex(ctx context.Context) {
 	coll := mgm.Coll(&Challenge{})
-	
+
 	indexView := coll.Indexes()
 	model := mongo.IndexModel{Keys: bson.M{"location": "2dsphere"}, Options: nil}
 	indexView.CreateOne(ctx, model)
