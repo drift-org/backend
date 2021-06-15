@@ -9,6 +9,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
@@ -16,9 +20,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"net/http"
-	"net/http/httptest"
-	"os"
 )
 
 /*
