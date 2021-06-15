@@ -4,7 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/drift-org/backend/helpers"
+	"backend/helpers"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +19,7 @@ func VerifyAuthenticated() gin.HandlerFunc {
 		tokenString := strings.Replace(context.Request.Header.Get("Authorization"), "Bearer ", "", 1)
 		userID, err := helpers.ValidateToken(tokenString)
 		if err != nil {
-			context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Auth token incorrect or expired."})
+			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Auth token incorrect or expired."})
 			return
 		}
 		context.Set("userID", userID)
