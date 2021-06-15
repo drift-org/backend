@@ -18,6 +18,7 @@ func SetupRouter() {
 
 	authRoute(router.Group("/auth"))
 	groupRoute(router.Group("/"))
+	userRoute(router.Group("/user"))
 
 	router.Run()
 }
