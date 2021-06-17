@@ -12,11 +12,11 @@ func milesToMeter(miles uint8) float64 {
 
 /*
 This helper function finds all the challenges that are within
-	radius(miles) based on the given location. 
+	radius(miles) based on the given location.
 
 Parameters:
-- longitude is the longitude of the given location 
-- latitude is the latitude of the given location 
+- longitude is the longitude of the given location
+- latitude is the latitude of the given location
 - radius defines the distance(in miles) the challenges have to be within
 */
 func FindChallenge(longitude float64, latitude float64, radius uint8) (*[]models.Challenge, error) {
