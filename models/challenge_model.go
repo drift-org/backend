@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"log"
 
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/bson"
@@ -39,6 +40,10 @@ func ChallengeIndex(ctx context.Context) {
 	coll := mgm.Coll(&Challenge{})
 
 	indexView := coll.Indexes()
+	// model := mongo.IndexModel{Keys: bson.M{"location": 1}, Options: nil}
 	model := mongo.IndexModel{Keys: bson.M{"location": "2dsphere"}, Options: nil}
-	indexView.CreateOne(ctx, model)
+	_, err := indexView.CreateOne(ctx, model)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
