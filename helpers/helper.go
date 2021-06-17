@@ -1,8 +1,12 @@
 package helpers
 
 import (
+	"context"
 	"log"
 	"reflect"
+	"time"
+
+	"github.com/drift-org/backend/models"
 )
 
 /*
@@ -35,4 +39,21 @@ func Map(t interface{}, f func(interface{}) interface{}) []interface{} {
 		return arr
 	}
 	return nil
+}
+
+/*
+Setup the indexes of all the collections
+
+As we create indexes for models, make sure to add them to this function
+*/
+func SetupIndexes() {
+	const INDEX_CREATION_TIME_THRESHOLD = 5
+
+	// Closes the channel and cancel the context when the time is up.
+	// Prevents the operation from running forever.
+	ctx, cancel := context.WithTimeout(
+		context.Background(), INDEX_CREATION_TIME_THRESHOLD*time.Second)
+	defer cancel()
+
+	models.CreateChallengeIndex(ctx)
 }

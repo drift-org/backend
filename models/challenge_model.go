@@ -29,18 +29,18 @@ func (model *Challenge) Saving() error {
 	}
 
 	if model.Location.Coordinates != nil {
-		// only need to worry about coordinates when creating challenges
+		// Set the location type to "Point" for when the coordinates
+		// field of challenges are modified (could be during create or update).
 		model.Location.Type = "Point"
 	}
 
 	return nil
 }
 
-func ChallengeIndex(ctx context.Context) {
+func CreateChallengeIndex(ctx context.Context) {
 	coll := mgm.Coll(&Challenge{})
 
 	indexView := coll.Indexes()
-	// model := mongo.IndexModel{Keys: bson.M{"location": 1}, Options: nil}
 	model := mongo.IndexModel{Keys: bson.M{"location": "2dsphere"}, Options: nil}
 	_, err := indexView.CreateOne(ctx, model)
 	if err != nil {
