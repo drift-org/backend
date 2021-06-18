@@ -24,7 +24,7 @@ func (ctrl *userController) Get(context *gin.Context) {
 	// 0 returns ONLY friend user IDs (default), 1 returns friend user IDs AND usernames
 	type IGet struct {
 		ID          string `form:"id" binding:"required"`
-		Specificity int    `form:"specificity" binding:"eq=0|eq=1" default:0`
+		Specificity int    `form:"specificity" binding:"eq=0|eq=1"`
 	}
 	var friendUsernames []string
 	var query IGet
@@ -55,6 +55,5 @@ func (ctrl *userController) Get(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{"message": "Success", "user": user, "friendUsernames": friendUsernames})
 		return
 	}
-
 	context.JSON(http.StatusOK, gin.H{"message": "Success", "user": user})
 }
