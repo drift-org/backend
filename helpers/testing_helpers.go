@@ -9,6 +9,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
@@ -16,9 +20,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"net/http"
-	"net/http/httptest"
-	"os"
 )
 
 /*
@@ -74,6 +75,7 @@ func TestWithMongo(databaseName string, tester func()) func() {
 		// the test runs, we still reset it before as well. This is because if a test
 		// fails halfway through, the reset afterwards is never hit.
 		ResetTestDB(database)
+		SetupIndexes()
 
 		// Run the test and reset the database.
 		tester()

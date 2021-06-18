@@ -22,5 +22,7 @@ func main() {
 	helpers.AlertError(err, "There was an error connecting to the database")
 	fmt.Println("Successfully connected to Mongo")
 
+	helpers.SetupIndexes()
+
 	routes.SetupRouter()
 }
