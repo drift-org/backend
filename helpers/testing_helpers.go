@@ -9,16 +9,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+
+	"github.com/drift-org/backend/models"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"net/http"
-	"net/http/httptest"
-	"os"
 )
 
 /*
@@ -135,4 +138,26 @@ For debugging purposes ONLY.
 */
 func GinkgoLog(message string) {
 	fmt.Fprintf(GinkgoWriter, "[DEBUG]"+message)
+}
+
+/*
+Creates a dummy user in the database, with a given username.
+*/
+func CreateDummyUser(username string) {
+	mgm.Coll(&models.User{}).Create(&models.User{
+		Username:     username,
+		Name:         "TestName",
+		Age:          10,
+		EmailAddress: username + "@Test.com",
+		Password:     "TestPassword",
+	})
+}
+
+/*
+Gets the authorization (simulates logging in) for a specific user, based on the username.
+*/
+func LoginAuthUsername(context *gin.Context, username string) {
+	user := &models.User{}
+	mgm.Coll(user).First(bson.M{"username": username}, user)
+	context.Set("userID", user.ID.Hex())
 }
