@@ -8,7 +8,7 @@ import (
 type Group struct {
 	mgm.DefaultModel `bson:",inline"`
 	Name             string               `bson:"name" json:"name" binding:"required"`
-	Users            []primitive.ObjectID `bson:"users" json:"users"`
+	Users            []primitive.ObjectID `bson:"users" json:"users" binding:"required"`
 	Drifts           []primitive.ObjectID `bson:"drifts" json:"drifts"`
 }
 
@@ -17,9 +17,6 @@ func (model *Group) Creating() error {
 		return err
 	}
 
-	if model.Users == nil {
-		model.Users = []primitive.ObjectID{}
-	}
 	if model.Drifts == nil {
 		model.Drifts = []primitive.ObjectID{}
 	}
