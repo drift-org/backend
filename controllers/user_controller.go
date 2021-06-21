@@ -20,7 +20,7 @@ func NewUserController() UserController {
 }
 
 func (ctrl *userController) Get(context *gin.Context) {
-	// Id refers to MongoDB user object ID. Specificty refers to the verbocity of the returned friends array
+	// ID refers to MongoDB user object ID. Specificity refers to the verbocity of the returned friends array
 	// 0 returns ONLY friend user IDs (default), 1 returns friend user IDs AND usernames
 	type IGet struct {
 		ID          string `form:"id" binding:"required"`

@@ -105,7 +105,7 @@ var _ = Describe("UserController", func() {
 			user := &models.User{}
 			_ = mgm.Coll(user).First(bson.M{"username": "username1"}, user)
 
-			// Create a sample request with the sample user's ID.
+			// Create a sample request with invalid ID.
 			context := helpers.CreateTestContext("", `{
 				"id": ""
 			}`)
