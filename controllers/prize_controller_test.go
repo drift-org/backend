@@ -33,7 +33,7 @@ var _ = Describe("PrizeController", func() {
 	//----------------------------------------------------------------------------------------
 
 	Describe("Create", func() {
-		It("Basic", helpers.TestWithMongo("GroupController-Create-Basic", func() {
+		It("Basic", helpers.TestWithMongo("PrizeController-Create-Basic", func() {
 
 			// Create the first request to Create the prize.
 			context := helpers.CreateTestContext("", `{
