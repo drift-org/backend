@@ -8,7 +8,7 @@ import (
 type Group struct {
 	mgm.DefaultModel `bson:",inline"`
 	Name             string               `bson:"name" json:"name" binding:"required"`
-	Users            []primitive.ObjectID `bson:"users" json:"users" binding:"required"`
+	Users            []primitive.ObjectID `bson:"users" json:"users" binding:"min=0,required"`
 	Drifts           []primitive.ObjectID `bson:"drifts" json:"drifts"`
 }
 
