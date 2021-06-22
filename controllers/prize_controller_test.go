@@ -14,16 +14,6 @@ import (
 	"github.com/drift-org/backend/models"
 )
 
-/*
-Simple utility function that lets a dummy prize in the database, with the given parameters..
-*/
-func CreateDummyPrize(name string, desc string) {
-	mgm.Coll(&models.Prize{}).Create(&models.Prize{
-		Name:        name,
-		Description: desc,
-	})
-}
-
 var _ = Describe("PrizeController", func() {
 
 	var (
@@ -49,8 +39,6 @@ var _ = Describe("PrizeController", func() {
 			prize := &models.Prize{}
 			_ = mgm.Coll(prize).First(bson.M{}, prize)
 			Expect(prize).NotTo(BeNil())
-
 		}))
-
 	})
 })

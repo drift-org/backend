@@ -30,5 +30,5 @@ func (ctrl *prizeController) Create(context *gin.Context) {
 		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Success", "Prize": body})
+	context.JSON(http.StatusOK, gin.H{"message": "Success", "prize": body})
 }
