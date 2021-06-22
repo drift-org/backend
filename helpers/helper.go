@@ -57,3 +57,11 @@ func SetupIndexes() {
 
 	models.CreateChallengeIndex(ctx)
 }
+
+// Simple utility function to calculate minimum of two integers
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
