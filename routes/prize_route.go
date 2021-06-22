@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/drift-org/backend/controllers"
+	"github.com/drift-org/backend/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,5 +18,5 @@ func prizeRoute(g *gin.RouterGroup) {
 	   can be validated, auth middleware will be inserted in. Until then,
 	   this route is largely intended for testing purposes.
 	*/
-	g.POST("/", prizeController.Create)
+	g.POST("/", middleware.VerifyAuthenticated(), prizeController.Create)
 }
