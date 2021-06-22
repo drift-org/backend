@@ -13,10 +13,8 @@ var (
 func prizeRoute(g *gin.RouterGroup) {
 
 	/*
-	   For now, authentication is not necessary to create a prize.
 	   In the future, when account roles are added and ADMIN status
-	   can be validated, auth middleware will be inserted in. Until then,
-	   this route is largely intended for testing purposes.
+	   can be validated, additional auth middleware will be inserted in.
 	*/
 	g.POST("/", middleware.VerifyAuthenticated(), prizeController.Create)
 }
