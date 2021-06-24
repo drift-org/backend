@@ -12,13 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// mgm.DefaultModel `bson:",inline"`
-// Challenges       []primitive.ObjectID `bson:"challenges" json:"challenges" binding:"required"`
-// Prize            primitive.ObjectID   `bson:"prize" json:"prize"`
-// Points           int                  `bson:"points" json:"points" binding:"required"`
-// Group            primitive.ObjectID   `bson:"group" json:"group" binding:"required"`
-// Progress         int                  `bson:"progress" json:"progress" binding:"required"`
-
 type DriftController interface {
 	Create(context *gin.Context)
 }
@@ -30,15 +23,14 @@ func NewDriftController() DriftController {
 }
 
 func (ctrl *driftController) Create(context *gin.Context) {
-	const LOWER_CHALLENGE_THRESHOLD, UPPER_CHALLENGE_THRESHOLD = 5, 8
+	const LOWER_CHALLENGE_THRESHOLD, UPPER_CHALLENGE_THRESHOLD = 4, 8
 	const DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_RADIUS = 34.0689, 118.4452, 10
 
 	type ICreate struct {
 		Prize     primitive.ObjectID `json:"prize"`
-		Points    int                `json:"points" binding:"required,min=1"`
 		Group     primitive.ObjectID `json:"group"`
-		Longitude float64            `json:"longitude"`
 		Latitude  float64            `json:"latitude"`
+		Longitude float64            `json:"longitude"`
 		Radius    uint8              `json:"radius"`
 	}
 	var body ICreate
@@ -47,24 +39,25 @@ func (ctrl *driftController) Create(context *gin.Context) {
 		return
 	}
 
+	// Set a random seed to be used later.
+	rand.Seed(time.Now().UnixNano())
+
 	// Convenience references to collections.
 	prize := models.Prize{}
 	group := models.Group{}
-
 	prizeCollection := mgm.Coll(&prize)
 	groupCollection := mgm.Coll(&group)
-	challengeCollection := mgm.Coll(&models.Challenge{})
 
-	// Validate the group and prize, making sure that both exist in our database.
-	// The group which is retrieved will later be used (to append to its Drifts field).
-	// The prize which is retrieved will be removed from the DB.
-	err := groupCollection.FindByID(body.Group, &group)
-	if err != nil {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	// If the prize field is empty or doesn't exist in our database, select a prize randomly.
+	// If there are no prizes in the database, return an error.
+	if err := prizeCollection.FindByID(body.Prize, &prize); err != nil {
+		// { $sample: { size: <positive integer> } }
+		// TODO: Add code for randomly selecting a prize.
+		// I
 	}
-	err = prizeCollection.FindByID(body.Prize, &prize)
-	if err != nil {
+	// Validate the group, making sure it exists in our database.
+	// The group which is retrieved will later be used (to append to the group's Drifts field).
+	if err := groupCollection.FindByID(body.Group, &group); err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -88,18 +81,50 @@ func (ctrl *driftController) Create(context *gin.Context) {
 	if body.Radius == 0 {
 		body.Radius = DEFAULT_RADIUS
 	}
-	fullChallengesList, err := helpers.FindChallenge(body.Longitude, body.Latitude, body.Radius)
-	var selectedChallengesList []primitive.ObjectID
+	fullChallengesListPointer, err := helpers.FindChallenge(body.Latitude, body.Longitude, body.Radius)
+	if err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Issue in retrieving challenges."})
+	}
+	// Grab the actual list for convenience purposes, since FindChallenge() only returns pointer.
+	fullChallengesList := *fullChallengesListPointer
+
+	// Ensure we have enough challenges to form a drift. If not, throw an error.
+	// In this case, the frontend will notify the user to change their filter (ex: increase radius)
+	if len(fullChallengesList) < LOWER_CHALLENGE_THRESHOLD {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Insufficient number of challenges."})
+	}
 
 	// Pick a random number between LOWER_CHALLENGE_THRESHOLD and min(UPPER_CHALLENGE_THRESHOLD, # of challenges in fullChallengesList).
-	// This operation is inclusive, hence the increment by 1 in the rand function).This will be the # of challenges in this particular Drift.
-	rand.Seed(time.Now().UnixNano())
-	var numChallenges = rand.Intn(helpers.Min(len(*fullChallengesList), UPPER_CHALLENGE_THRESHOLD)+1-LOWER_CHALLENGE_THRESHOLD) + LOWER_CHALLENGE_THRESHOLD
+	// This operation is inclusive, hence the increment by 1 in the rand function). This will be the # of challenges in this particular Drift.
+	numChallenges := rand.Intn(helpers.Min(len(fullChallengesList), UPPER_CHALLENGE_THRESHOLD)+1-LOWER_CHALLENGE_THRESHOLD) + LOWER_CHALLENGE_THRESHOLD
+	selectedChallengesList := make([]primitive.ObjectID, numChallenges)
+	driftPointValue := 0
 	for ; numChallenges > 10; numChallenges-- {
 		// 1) Find a random challenge from our fullChallengesList
-		// 2) Add it to our selectedChallengesList
-		// 3) Remove it from our fullChallengesList pool
-		selectedChallengesList = append(selectedChallengesList, primitive.ObjectID{})
+		randIndex := rand.Intn(len(fullChallengesList))
+		randChallenge := fullChallengesList[randIndex]
+
+		// 2) Add it to our selectedChallengesList, update driftPointValue
+		selectedChallengesList = append(selectedChallengesList, randChallenge.ID)
+		driftPointValue += randChallenge.Points
+
+		// 3) Remove it from our fullChallengesList slice. In doing so, explicitly
+		// set the removed challenge to nil, to prevent potential memory leaks
+		// (see https://stackoverflow.com/questions/55045402/memory-leak-in-golang-slice)
+		fullChallengesList[randIndex] = fullChallengesList[len(fullChallengesList)-1]
+		fullChallengesList[len(fullChallengesList)-1] = models.Challenge{}
+		fullChallengesList = fullChallengesList[:len(fullChallengesList)-1]
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Success", "drift": nil})
+
+	drift := &models.Drift{
+		Challenges: selectedChallengesList,
+		Prize:      prize.ID,
+		Points:     driftPointValue,
+		Group:      body.Group,
+		Progress:   0,
+	}
+
+	// Update group's Drifts field
+
+	context.JSON(http.StatusOK, gin.H{"message": "Success", "drift": drift})
 }
