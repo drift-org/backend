@@ -27,8 +27,7 @@ func (ctrl *driftController) Create(context *gin.Context) {
 	const DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_RADIUS = 34.0689, 118.4452, 10
 
 	type ICreate struct {
-		Prize     primitive.ObjectID `json:"prize"`
-		Group     primitive.ObjectID `json:"group"`
+		Group     primitive.ObjectID `json:"group" binding:"required"`
 		Latitude  float64            `json:"latitude"`
 		Longitude float64            `json:"longitude"`
 		Radius    uint8              `json:"radius"`
@@ -43,30 +42,15 @@ func (ctrl *driftController) Create(context *gin.Context) {
 	rand.Seed(time.Now().UnixNano())
 
 	// Convenience references to collections.
-	prize := models.Prize{}
 	group := models.Group{}
-	prizeCollection := mgm.Coll(&prize)
 	groupCollection := mgm.Coll(&group)
 
-	// If the prize field is empty or doesn't exist in our database, select a prize randomly.
-	// If there are no prizes in the database, return an error.
-	if err := prizeCollection.FindByID(body.Prize, &prize); err != nil {
-		// { $sample: { size: <positive integer> } }
-		// TODO: Add code for randomly selecting a prize.
-		// I
-	}
 	// Validate the group, making sure it exists in our database.
 	// The group which is retrieved will later be used (to append to the group's Drifts field).
 	if err := groupCollection.FindByID(body.Group, &group); err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// TODO: Determine when is the optimal time to remove prize from DB - 1) after Drift started,
-	// which might mean that we "throw away" prizes to drifts that may never finish, or
-	// 2) after Drift completed, which would prevent collisions in case two drifts get the same prize.
-	// For now, logic for option 1) is implemented.
-	prizeCollection.Delete(&prize)
 
 	// If latitude, longitude, or radius are not provided, set them to default values.
 	// Radius will default to 10 miles.
@@ -115,16 +99,26 @@ func (ctrl *driftController) Create(context *gin.Context) {
 		fullChallengesList[len(fullChallengesList)-1] = models.Challenge{}
 		fullChallengesList = fullChallengesList[:len(fullChallengesList)-1]
 	}
-
+	// Initialize the drift. The prize field will be a nil ObjectID, and will be updated
+	// once the Drift is completed.
 	drift := &models.Drift{
 		Challenges: selectedChallengesList,
-		Prize:      prize.ID,
+		Prize:      primitive.ObjectID{},
 		Points:     driftPointValue,
 		Group:      body.Group,
 		Progress:   0,
 	}
+	driftCollection := mgm.Coll(drift)
+	if err = driftCollection.Create(drift); err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Error in saving Drift."})
+		return
+	}
 
 	// Update group's Drifts field
-
+	group.Drifts = append(group.Drifts, drift.ID)
+	if err = groupCollection.Update(&group); err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Error in updating corresponding group."})
+		return
+	}
 	context.JSON(http.StatusOK, gin.H{"message": "Success", "drift": drift})
 }
