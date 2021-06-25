@@ -67,7 +67,7 @@ func (ctrl *driftController) Create(context *gin.Context) {
 	}
 	fullChallengesListPointer, err := helpers.FindChallenge(body.Latitude, body.Longitude, body.Radius)
 	if err != nil {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Issue in retrieving challenges."})
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Issue in retrieving challenges. " + err.Error()})
 	}
 	// Grab the actual list for convenience purposes, since FindChallenge() only returns pointer.
 	fullChallengesList := *fullChallengesListPointer

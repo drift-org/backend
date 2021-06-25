@@ -1,6 +1,8 @@
 package helpers
 
 import (
+	"errors"
+
 	"github.com/drift-org/backend/models"
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/bson"
@@ -9,6 +11,11 @@ import (
 func milesToMeter(miles uint8) float64 {
 	const METERS_PER_MILE = 1609.344
 	return float64(miles) * METERS_PER_MILE
+}
+
+// Helper function to determine if lat and long coordinates are valid.
+func validateCoordinates(latitude float64, longitude float64) bool {
+	return (-90 <= latitude && latitude <= 90) && (-180 <= longitude && longitude <= 180)
 }
 
 /*
@@ -20,7 +27,10 @@ Parameters:
 - latitude is the latitude of the given location
 - radius defines the distance (in miles) the challenges have to be within
 */
-func FindChallenge(longitude float64, latitude float64, radius uint8) (*[]models.Challenge, error) {
+func FindChallenge(latitude float64, longitude float64, radius uint8) (*[]models.Challenge, error) {
+	if valid := validateCoordinates(latitude, longitude); valid == false {
+		return nil, errors.New("Invalid coordinates.")
+	}
 	coll := mgm.Coll(&models.Challenge{})
 	results := []models.Challenge{}
 	distance := milesToMeter(radius)
