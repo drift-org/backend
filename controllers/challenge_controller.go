@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/drift-org/backend/models"
@@ -48,9 +47,8 @@ func (ctrl *challengeController) Create(context *gin.Context) {
 
 	// If lat/long/address information is provided, include it in our Challenge model.
 	if body.Latitude != 0 && body.Longitude != 0 && body.Address != "" {
-		location.Type = "Point"
 		location.Coordinates = []float64{body.Longitude, body.Latitude}
-		challenge.Location = location
+		challenge.Location = &location
 		challenge.Address = body.Address
 	}
 	challengeCollection := mgm.Coll(&challenge)
@@ -61,7 +59,6 @@ func (ctrl *challengeController) Create(context *gin.Context) {
 	}
 
 	if err := challengeCollection.Create(&challenge); err != nil {
-		fmt.Println(err.Error())
 		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

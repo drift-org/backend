@@ -16,11 +16,11 @@ type Location struct {
 
 type Challenge struct {
 	mgm.DefaultModel `bson:",inline"`
-	Location         Location `bson:"location" json:"location"`
-	Address          string   `bson:"address" json:"address"`
-	TaskName         string   `bson:"taskName" json:"taskName" binding:"required"`
-	Description      string   `bson:"description" json:"description" binding:"required"`
-	Points           int      `bson:"points" json:"points" binding:"required"`
+	Location         *Location `bson:"location,omitempty" json:"location,omitempty"`
+	Address          string    `bson:"address" json:"address"`
+	TaskName         string    `bson:"taskName" json:"taskName" binding:"required"`
+	Description      string    `bson:"description" json:"description" binding:"required"`
+	Points           int       `bson:"points" json:"points" binding:"required"`
 }
 
 func (model *Challenge) Saving() error {
@@ -28,7 +28,7 @@ func (model *Challenge) Saving() error {
 		return err
 	}
 
-	if model.Location.Coordinates != nil {
+	if model.Location != nil {
 		// Set the location type to "Point" for when the coordinates
 		// field of challenges are modified (could be during create or update).
 		model.Location.Type = "Point"
