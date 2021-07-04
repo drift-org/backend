@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/drift-org/backend/helpers"
 	"github.com/drift-org/backend/models"
 	"github.com/gin-gonic/gin"
 	"github.com/kamva/mgm/v3"
@@ -30,7 +31,7 @@ func (ctrl *challengeController) Create(context *gin.Context) {
 		Address     string  `json:"address"`
 		TaskName    string  `json:"taskName" binding:"required"`
 		Description string  `json:"description" binding:"required"`
-		Points      int     `json:"points" binding:"required,min=1"`
+		Points      int     `json:"points" binding:"required,min=0"`
 	}
 	var body ICreate
 	if err := context.ShouldBindJSON(&body); err != nil {
@@ -44,17 +45,50 @@ func (ctrl *challengeController) Create(context *gin.Context) {
 		Description: body.Description,
 		Points:      body.Points,
 	}
+	location.Type = "Point"
 
-	// If lat/long/address information is provided, include it in our Challenge model.
-	if body.Latitude != 0 && body.Longitude != 0 && body.Address != "" {
-		location.Coordinates = []float64{body.Longitude, body.Latitude}
-		challenge.Location = &location
+	// If address information is provided, include it in our Challenge model.
+	if body.Address != "" {
 		challenge.Address = body.Address
+
+		// If lat/long was not provided, geocode the address and retrieve the appropriate coordinates.
+		if body.Latitude == 0 && body.Longitude == 0 {
+			if latitude, longitude, err := helpers.GeocodeAddress(body.Address); err == nil {
+				body.Latitude, body.Longitude = latitude, longitude
+			} else {
+				context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Address or lat/long coordinates are invalid."})
+				return
+			}
+		}
 	}
+
+	// If lat/long information is provided/has been geocoded, validate them and include in Challenge model.
+	if body.Latitude != 0 && body.Longitude != 0 {
+		if helpers.ValidateCoordinates(body.Latitude, body.Longitude) {
+			location.Coordinates = []float64{body.Longitude, body.Latitude}
+			challenge.Location = &location
+		} else {
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Lat/long coordinates are invalid."})
+			return
+		}
+	}
+
 	challengeCollection := mgm.Coll(&challenge)
-	// Check if a challenge with the same address and task exist. If so, throw an error.
-	if err := challengeCollection.First(bson.M{"taskName": challenge.TaskName, "address": challenge.Address}, &challenge); err == nil {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Challenge with same address and task name already exists."})
+
+	query := bson.M{"taskName": challenge.TaskName}
+
+	// If location info is included in our challenge, validate duplicates based on this field as well.
+	if challenge.Location != nil {
+		query["location"] = challenge.Location
+	}
+
+	// Check if a duplicate exists - if so, throw an error.
+	if err := challengeCollection.First(query, &challenge); err == nil {
+		errMsg := "Challenge with same task name already exists."
+		if query["location"] != nil {
+			errMsg = "Challenge with same task name and location already exists."
+		}
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": errMsg})
 		return
 	}
 

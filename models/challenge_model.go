@@ -14,13 +14,24 @@ type Location struct {
 	Coordinates []float64 `json:"coordinates" bson:"coordinates" binding:"required"`
 }
 
+// Location (lat/long) and Address information are optional.
+// Case 1: Location (provided), Address (provided)
+//      - Create object as usual.
+// Case 2: Location (provided), Address (not provided)
+//      - Create object with Location, but no Address.
+// Case 3: Location (not provided), Address (provided)
+//      - Geocode address and retrieve lat/long, create
+//        object with Location & Address.
+// Case 4: Location (not provided), Address (not provided)
+//      - Create object as usual, without both information.
+//        Validate duplicates based only on taskName.
 type Challenge struct {
 	mgm.DefaultModel `bson:",inline"`
 	Location         *Location `bson:"location,omitempty" json:"location,omitempty"`
 	Address          string    `bson:"address" json:"address"`
 	TaskName         string    `bson:"taskName" json:"taskName" binding:"required"`
 	Description      string    `bson:"description" json:"description" binding:"required"`
-	Points           int       `bson:"points" json:"points" binding:"required"`
+	Points           int       `bson:"points" json:"points" binding:"required,min=0"`
 }
 
 func (model *Challenge) Saving() error {
