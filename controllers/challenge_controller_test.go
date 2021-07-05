@@ -168,6 +168,19 @@ var _ = Describe("ChallengeController", func() {
 			challengeController.Create(context3)
 			Expect(context3.Writer.Status()).To(Equal(http.StatusBadRequest))
 
+			// Create a sample request for a challenge to be created, with invalid lat/long values.
+			context4 := helpers.CreateTestContext("", `{
+				"latitude": 1000,
+				"longitude": -1000,
+				"address": "1234 Main Street",
+				"taskName": "Task 1",
+				"description": "Description",
+				"points": 10.5
+			}`)
+
+			// Test the challenge, and that the response is bad.
+			challengeController.Create(context4)
+			Expect(context4.Writer.Status()).To(Equal(http.StatusBadRequest))
 		}))
 
 		It("Autopopulates Arguments", helpers.TestWithMongo("ChallengeController-Create-Autopopulate", func() {
