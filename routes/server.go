@@ -19,6 +19,7 @@ func SetupRouter() {
 	authRoute(router.Group("/auth"))
 	groupRoute(router.Group("/group"))
 	prizeRoute(router.Group("/prize"))
+	challengeRoute(router.Group("/challenge"))
 
 	router.Run()
 }

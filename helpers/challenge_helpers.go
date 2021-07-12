@@ -6,6 +6,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+// Default lat/long are given as UCLA's coordinates. Default radius is arbitrarily set to 10.
+const DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_RADIUS = 34.0701449, -118.4422936, 10
+
 func milesToMeter(miles uint8) float64 {
 	const METERS_PER_MILE = 1609.344
 	return float64(miles) * METERS_PER_MILE
@@ -44,4 +47,30 @@ func FindChallenge(longitude float64, latitude float64, radius uint8) (*[]models
 		return nil, err
 	}
 	return &results, nil
+}
+
+/*
+TODO: This helper function geocodes the provided address to a valid set
+of lat/long coordinates. Currently, it returns a default response of coordinates,
+currently UCLA's location.
+
+Parameters:
+- address is the address, in string format, provided by the user
+*/
+func GeocodeAddress(address string) (float64, float64, error) {
+	// Return the default lat/long coordinates for now.
+	return DEFAULT_LATITUDE, DEFAULT_LONGITUDE, nil
+}
+
+/*
+Helper function to determine if lat and long coordinates are valid.
+
+Parameters:
+- latitude is the latitude of the given location
+- longitude is the longitude of the given location
+*/
+func ValidateCoordinates(latitude float64, longitude float64) bool {
+	// TODO: Possibly add an optional "address" field where we verify that the coordinates & the address point
+	// to the same location?
+	return (-90 <= latitude && latitude <= 90) && (-180 <= longitude && longitude <= 180)
 }
