@@ -29,7 +29,7 @@ func (ctrl *challengeController) Create(context *gin.Context) {
 		Latitude    float64 `json:"latitude"`
 		Longitude   float64 `json:"longitude"`
 		Address     string  `json:"address"`
-		TaskName    string  `json:"taskName" binding:"required"`
+		Name        string  `json:"name" binding:"required"`
 		Description string  `json:"description" binding:"required"`
 		Points      int     `json:"points" binding:"required,min=0"`
 	}
@@ -41,7 +41,7 @@ func (ctrl *challengeController) Create(context *gin.Context) {
 	location := models.Location{}
 
 	challenge := models.Challenge{
-		TaskName:    body.TaskName,
+		Name:        body.Name,
 		Description: body.Description,
 		Points:      body.Points,
 	}
@@ -75,7 +75,7 @@ func (ctrl *challengeController) Create(context *gin.Context) {
 
 	challengeCollection := mgm.Coll(&challenge)
 
-	query := bson.M{"taskName": challenge.TaskName}
+	query := bson.M{"name": challenge.Name}
 
 	// If location info is included in our challenge, validate duplicates based on this field as well.
 	if challenge.Location != nil {

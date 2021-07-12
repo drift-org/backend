@@ -28,7 +28,7 @@ var _ = Describe("ChallengeController", func() {
 				"latitude": 34.0701449,
 				"longitude": -118.4422936,
 				"address": "1234 Main Street",
-				"taskName": "Task 1",
+				"name": "Task 1",
 				"description": "Description",
 				"points": 10
 			}`)
@@ -42,12 +42,12 @@ var _ = Describe("ChallengeController", func() {
 			_ = mgm.Coll(challenge).First(bson.M{}, challenge)
 			Expect(challenge).NotTo(BeNil())
 
-			// Attempt creating a user with just the same location.
+			// Attempt creating a challenge with just the same location.
 			context2 := helpers.CreateTestContext("", `{
 				"latitude": 34.0701449,
 				"longitude": -118.4422936,
 				"address": "1234 Main Street",
-				"taskName": "Task 2",
+				"name": "Task 2",
 				"description": "Description",
 				"points": 20
 			}`)
@@ -55,15 +55,16 @@ var _ = Describe("ChallengeController", func() {
 			Expect(context2.Writer.Status()).To(Equal(http.StatusOK))
 
 			// Test that the challenge was written to mongo.
-			_ = mgm.Coll(challenge).First(bson.M{}, challenge)
+			challenge = &models.Challenge{}
+			_ = mgm.Coll(challenge).First(bson.M{"name": "Task 2"}, challenge)
 			Expect(challenge).NotTo(BeNil())
 
-			// Attempt creating a user with just the same task name.
+			// Attempt creating a challenge with just the same task name.
 			context3 := helpers.CreateTestContext("", `{
 				"latitude": 20.02,
 				"longitude": 20.02,
 				"address": "1234 Main Street",
-				"taskName": "Task 1",
+				"name": "Task 1",
 				"description": "Description",
 				"points": 20
 			}`)
@@ -74,12 +75,12 @@ var _ = Describe("ChallengeController", func() {
 			_ = mgm.Coll(challenge).First(bson.M{}, challenge)
 			Expect(challenge).NotTo(BeNil())
 
-			// Attempt creating a challenge with the same location & taskName.
+			// Attempt creating a challenge with the same location & name.
 			context4 := helpers.CreateTestContext("", `{
 				"latitude": 34.0701449,
 				"longitude": -118.4422936,
 				"address": "1234 Main Street",
-				"taskName": "Task 1",
+				"name": "Task 1",
 				"description": "Description",
 				"points": 20
 			}`)
@@ -88,20 +89,19 @@ var _ = Describe("ChallengeController", func() {
 
 			// Attempt creating challenge with no location/address info, but same task name
 			context5 := helpers.CreateTestContext("", `{
-				"taskName": "Task 1",
+				"name": "Task 1",
 				"description": "Description",
 				"points": 20
 			}`)
 			challengeController.Create(context5)
 			Expect(context5.Writer.Status()).To(Equal(http.StatusBadRequest))
-
 		}))
 
 		It("Test No Location Info", helpers.TestWithMongo("ChallengeController-Create-No-Location", func() {
 
 			// Attempt creating a challenge with only the minimum required fields.
 			context := helpers.CreateTestContext("", `{
-				"taskName": "Task 1",
+				"name": "Task 1",
 				"description": "Description",
 				"points": 20
 			}`)
@@ -112,16 +112,6 @@ var _ = Describe("ChallengeController", func() {
 			challenge := &models.Challenge{}
 			_ = mgm.Coll(challenge).First(bson.M{}, challenge)
 			Expect(challenge).NotTo(BeNil())
-
-			// Attempt creating a challenge with the same taskName.
-			duplicateContext := helpers.CreateTestContext("", `{
-				"taskName": "Task 1",
-				"description": "Description",
-				"points": 20
-			}`)
-			challengeController.Create(duplicateContext)
-			Expect(duplicateContext.Writer.Status()).To(Equal(http.StatusBadRequest))
-
 		}))
 
 		It("Test Invalid Arguments", helpers.TestWithMongo("ChallengeController-Create-Invalid-Args", func() {
@@ -131,7 +121,7 @@ var _ = Describe("ChallengeController", func() {
 				"latitude": 10.01,
 				"longitude": 10.01,
 				"address": "1234 Main Street",
-				"taskName": "Task 1",
+				"name": "Task 1",
 				"description": "Description",
 				"points": -1
 			}`)
@@ -145,7 +135,7 @@ var _ = Describe("ChallengeController", func() {
 				"latitude": 10.01,
 				"longitude": 10.01,
 				"address": "1234 Main Street",
-				"taskName": "Task 1",
+				"name": "Task 1",
 				"description": "Description",
 				"points": 10.5
 			}`)
@@ -159,7 +149,7 @@ var _ = Describe("ChallengeController", func() {
 				"latitude": 500,
 				"longitude": -500,
 				"address": "1234 Main Street",
-				"taskName": "Task 1",
+				"name": "Task 1",
 				"description": "Description",
 				"points": 20
 			}`)
@@ -167,20 +157,6 @@ var _ = Describe("ChallengeController", func() {
 			// Test the challenge, and that the response is bad.
 			challengeController.Create(context3)
 			Expect(context3.Writer.Status()).To(Equal(http.StatusBadRequest))
-
-			// Create a sample request for a challenge to be created, with invalid lat/long values.
-			context4 := helpers.CreateTestContext("", `{
-				"latitude": 1000,
-				"longitude": -1000,
-				"address": "1234 Main Street",
-				"taskName": "Task 1",
-				"description": "Description",
-				"points": 10.5
-			}`)
-
-			// Test the challenge, and that the response is bad.
-			challengeController.Create(context4)
-			Expect(context4.Writer.Status()).To(Equal(http.StatusBadRequest))
 		}))
 
 		It("Autopopulates Arguments", helpers.TestWithMongo("ChallengeController-Create-Autopopulate", func() {
@@ -188,7 +164,7 @@ var _ = Describe("ChallengeController", func() {
 			// Create a sample request for a challenge to be created, without lat/long.
 			context := helpers.CreateTestContext("", `{
 				"address": "10740 Dickson Ct, Los Angeles, CA 90095",
-				"taskName": "Task 1",
+				"name": "Task 1",
 				"description": "Description",
 				"points": 10
 			}`)
@@ -209,7 +185,7 @@ var _ = Describe("ChallengeController", func() {
 			// Should autopopulate same coordinates & fail.
 			context2 := helpers.CreateTestContext("", `{
 				"address": "10740 Dickson Ct, Los Angeles, CA 90095",
-				"taskName": "Task 1",
+				"name": "Task 1",
 				"description": "Description",
 				"points": 20
 			}`)

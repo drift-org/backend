@@ -24,12 +24,12 @@ type Location struct {
 //        object with Location & Address.
 // Case 4: Location (not provided), Address (not provided)
 //      - Create object as usual, without both information.
-//        Validate duplicates based only on taskName.
+//        Validate duplicates based only on name.
 type Challenge struct {
 	mgm.DefaultModel `bson:",inline"`
 	Location         *Location `bson:"location,omitempty" json:"location,omitempty"`
 	Address          string    `bson:"address" json:"address"`
-	TaskName         string    `bson:"taskName" json:"taskName" binding:"required"`
+	Name             string    `bson:"name" json:"name" binding:"required"`
 	Description      string    `bson:"description" json:"description" binding:"required"`
 	Points           int       `bson:"points" json:"points" binding:"required,min=0"`
 }

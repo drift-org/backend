@@ -15,7 +15,5 @@ func challengeRoute(g *gin.RouterGroup) {
 	   In the future, when account roles are added and ADMIN status
 	   can be validated, additional auth middleware will be inserted in.
 	*/
-	// g.POST("/", middleware.VerifyAuthenticated(), challengeController.Create)
-
 	g.POST("/", challengeController.Create)
 }
